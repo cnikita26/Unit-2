@@ -1,0 +1,31 @@
+// Function constructor
+function FourWheeler(wheels,model, color, speed, fuel) {
+    this.wheels=wheels
+    this.model=model
+    this.color=color
+    this.speed=speed
+    this.fuel=fuel
+}
+
+FourWheeler.prototype.setSpeed = function(x){
+    this.speed=x
+}
+FourWheeler.prototype.updateColor = function(x){
+    this.color=x
+}
+FourWheeler.prototype.updateFuel = function(x){
+    this.fuel=x
+}
+
+// Parent object for Object.create
+let FourWheelerObject = {};
+
+// Store function contructor object here
+var car1 = new FourWheeler("wheels","model", "color", "speed", "fuel")
+
+
+
+// Store Object.create here
+var car2 = Object.create(FourWheelerObject);
+Object.setPrototypeOf(car2,car1)
+export { car1, car2 };

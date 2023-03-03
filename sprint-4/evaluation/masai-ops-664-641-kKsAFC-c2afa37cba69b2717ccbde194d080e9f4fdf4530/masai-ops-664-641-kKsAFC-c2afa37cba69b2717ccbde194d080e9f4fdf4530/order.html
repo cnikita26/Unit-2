@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Page</title>
+    <style>
+      /* All Your css for Order page goes here  */
+      .nav{
+        text-align: center;
+      }
+      #total{
+        text-align: center;
+      }
+      #cupon{
+        text-align: center;
+      }
+      #order-container{
+        display:grid;
+        grid-template-columns: repeat(4,1fr);
+        gap:40px;
+        row-gap: 40px;
+       
+      }
+      #order-container>div{
+        width:100%;
+        height:500px;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+        /* margin:auto; */
+        padding:10px;
+      }
+      #order-container>div>img{
+        width:100%;
+        height:50%;
+        /* padding:10px; */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="nav">
+      <h1>Web Coffee Shop Menu</h1>
+      <a href="./index.html">Home</a>
+      <a href="./order.html">Ordered</a>
+    </div>
+    <h1 id="total">
+      Your total order value is :- <span id="order-total">0</span>
+    </h1>
+    <div id="cupon">
+      <input type="text" />
+      <button>Add Cupon</button>
+    </div>
+    <div id="order-container">
+      <!-- Here Append All the Order Cards here-->
+    </div>
+  </body>
+  <script>
+    // All your JS code for Order Page goes here
+    let buyData=JSON.parse(localStorage.getItem("buy")) || [];
+    let cont=document.getElementById("order-container");
+    let total = document.getElementById("order-total")
+
+    createDom(buyData)
+
+    function createDom(data){
+      cont.innerHTML=null;
+      let string=data.map(item=>{
+        return `
+        <div class="card">
+          <img src=${item.image} alter="no found">
+          <h1>${item.title}</h1>
+          <p>${item.ingredients[0]}</p>
+          <p>${item.description.substring(0,100)}</p>
+          <p>${item.price}</p>
+          <button class="increment"> + </button>
+          <span class="num">1</span>
+          <button class="decrement"> - </button>
+          <button class="cancel"> Cancel </button>
+          
+        
+          
+        </div>
+        `
+      })
+
+      let initialValue=0;
+      for(let i=0;i<buyData.length;i++){
+        initialValue+=buyData[i].price
+      }
+
+      total.innerText=initialValue;
+      cont.innerHTML=string.join(" ");
+    }
+
+    let cancelBtn=document.getElementsByClassName("cancel");
+    for(let i=0;i<cancelBtn.length;i++){
+      cancelBtn[i].addEventListener("click",()=>{
+        let filterData=buyData.filter((item,index)=>index!==i);
+        buyData=filterData;
+
+        localStorage.setItem("buy",JSON.stringify(buyData));
+        createDom(filterData);
+      })
+    }
+   
+    
+  </script>
+</html>

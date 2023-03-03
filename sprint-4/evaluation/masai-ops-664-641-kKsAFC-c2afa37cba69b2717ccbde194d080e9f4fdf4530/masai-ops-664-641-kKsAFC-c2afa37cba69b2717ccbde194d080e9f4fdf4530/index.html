@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home Page</title>
+    <style>
+      /* All Your css for Home page goes here  */
+      *{
+        margin:0px;padding: 0px;box-sizing: border-box;
+      }
+
+      #menu-container{
+        display:grid;
+        grid-template-columns: repeat(4,1fr);
+        gap:40px;
+        row-gap: 40px;
+       
+      }
+      #menu-container>div{
+        width:100%;
+        height:500px;
+        box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+        /* margin:auto; */
+        padding:10px;
+      }
+      #menu-container>div>img{
+        width:100%;
+        height:50%;
+        /* padding:10px; */
+      }
+      .nav{
+        
+        text-align: center;
+      }
+      .buy{
+        margin:auto;
+        display:block;
+        background-color: #49bff7;
+        color: white;
+        border:none;
+        border-radius: 5px;
+        padding: 10px;
+      }
+      #sort{
+        margin:auto;
+        display:block;
+        margin-bottom: 10px;
+      }
+      #filter{
+       text-align: center;
+       margin-bottom: 10px;
+       margin-top: 10px;
+      }
+      
+    </style>
+  </head>
+
+  <body>
+    <div class="nav">
+      <h1>Web Coffee Shop Menu</h1>
+      <a href="./index.html">Home</a>
+      <a href="./order.html">Ordered</a>
+    </div>
+    <div id="filter">
+      <input type="number" id="lower" />
+      <input type="number" id="upper" />
+      <button id="filter-btn">Filter</button>
+    </div>
+    <select id="sort">
+      <option value="">Sort By Price</option>
+      <option value="asc">Ascending</option>
+      <option value="desc">Descending</option>
+    </select>
+    <h1 id="alert"></h1>
+    <div id="menu-container">
+      <!-- Here Append All the Items  -->
+    </div>
+  </body>
+  <script>
+    // All your JS code for Home Page goes here
+    const url = `https://dbioz2ek0e.execute-api.ap-south-1.amazonaws.com/mockapi/get-coffee`;
+
+    let buyData=JSON.parse(localStorage.getItem("buy")) || [];
+
+    let buyer=[]
+
+    let cont=document.getElementById("menu-container");
+    let sorting = document.getElementById("sort");
+    let ascenurl = `https://dbioz2ek0e.execute-api.ap-south-1.amazonaws.com/mockapi/get-coffee?sort=price&order=asc`;
+    let descenurl=`https://dbioz2ek0e.execute-api.ap-south-1.amazonaws.com/mockapi/get-coffee?sort=price&order=desc`;
+
+    let mainData=[];
+    getFetch(url).then(data=>{
+      mainData=data.data;
+      createDom(data.data)
+    }).catch(err=>console.log(err))
+
+    let filterbyPrice=document.getElementById("filter-btn");
+    let lower=document.getElementById("lower");
+    let upper=document.getElementById("upper")
+
+
+    filterbyPrice.addEventListener("click",()=>{
+      let filterData=mainData.filter(item=>{
+        if((+item.price >=+lower.value) && (+item.price <= upper.value)){
+           return true
+        }else{
+          return false
+        }
+      })
+      createDom(filterData)
+    })
+
+
+
+    // getFetch(url).then(data=>createDom(data.data)).catch(err=>console.log(err));
+
+
+    sorting.addEventListener("change",()=>{
+      if(sorting.value==" "){
+        createDom();
+      }else if(sorting.value=="asc"){
+        sortData(ascenurl).then(data=>createDom(data.data)).catch(err=>console.log(err))
+      }else{
+        sortData(descenurl).then(data=>createDom(data.data)).catch(err=>console.log(err))
+      }
+    });
+
+    async function sortData(url){
+      try {
+        let response = await fetch(url);
+        let data=await response.json();
+        return data;
+      } catch (error){
+        return error;
+      }
+    }
+
+
+    // function sortData
+
+
+    function createDom(data){
+      cont.innerHTML=null;
+      let string=data.map(item=>{
+        return `
+        <div class="card">
+          <img src=${item.image} alter="no found">
+          <h1>${item.title}</h1>
+          <p>${item.ingredients[0]}</p>
+          <p>${item.description}</p>
+          <p>${item.price}</p>
+          <button class="buy"> Buy </button>
+        </div>
+        `
+      })
+
+      cont.innerHTML=string.join(" ");
+
+      let alertMsg=document.getElementById("alert")
+
+      let buy = document.getElementsByClassName("buy");
+
+
+      for(let i=0;i<buy.length;i++){
+        buy[i].addEventListener("click",()=>{
+          let temp=[];
+          for(let j=0;j<mainData.length;j++){
+            if(i==j){
+              temp=mainData[i]
+            }
+          }
+          let istrue=false;
+          for(let k=0;k<buyData.length;k++){
+            if(temp.id===buyData[k].id){
+              istrue=true;
+            }
+          }
+          if(istrue){
+            alertMsg.innerText="Already Placed Order"
+          }else{
+            buyData.push(temp);
+
+            localStorage.setItem("buy",JSON.stringify(buyData));
+            alertMsg.innerText="Successfully Placed Order"
+          }
+        })
+      }
+    }
+
+
+    async function getFetch(url){
+      try {
+        let response = await fetch(url);
+        let data=await response.json();
+        return data;
+      }
+      catch(error){
+        return error;
+      }
+    }
+  </script>
+</html>
